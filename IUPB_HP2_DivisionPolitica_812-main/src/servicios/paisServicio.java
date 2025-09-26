@@ -30,4 +30,11 @@ public class paisServicio {
         }
     }
  
+    public static void mostrar (DefaultMutableTreeNode nodoRaiz){
+        if (paises != null)
+            for(Pais p : paises){
+                DefaultMutableTreeNode nodoPais = new DefaultMutableTreeNode(p.getNombre());
+                nodoRaiz.add(nodoPais);
+            }
+    }
 }
