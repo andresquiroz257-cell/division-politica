@@ -108,6 +108,7 @@ public class FrmDivisionPolitica extends JFrame {
         String nombrePais = getNombrePais();
         if (!nombrePais.isEmpty()) {
             lblMapa.setText(null);
+            lblMapa.setFont(getFont().deriveFont(java.awt.Font.BOLD, 16f)); 
             paisServicio.mostrarMapa(lblMapa, nombrePais, escala);
         }
     }
