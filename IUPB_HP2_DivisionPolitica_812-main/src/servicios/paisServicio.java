@@ -1,13 +1,17 @@
 package servicios;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import java.awt.Image;
+import java.io.File;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import entidades.Ciudad;
 import entidades.Pais;
@@ -18,23 +22,64 @@ public class paisServicio {
     private static List<Pais> paises;
 
     public static void cargarDatos() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        
+       String nombreArchivo = System.getProperty("user.dir") +
+                "/src/datos/DivisionPolitica.json";
+
+        ObjectMapper mapeador = new ObjectMapper();
         try {
-            String nombreArchivo = System.getProperty("user.dir")
-                    + "/src/datos/DivisionPolitica.json";
-            paises = objectMapper.readValue(new File(nombreArchivo),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, Pais.class));
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "No se pudieron cargar los datos" + e);
+            paises = mapeador.readValue(new File(nombreArchivo),
+                    mapeador.getTypeFactory()
+                            .constructCollectionType(List.class, Pais.class));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "No se pudieron cargar los datos." + ex);
         }
     }
  
-    public static void mostrar (DefaultMutableTreeNode nodoRaiz){
-        if (paises != null)
-            for(Pais p : paises){
-                DefaultMutableTreeNode nodoPais = new DefaultMutableTreeNode(p.getNombre());
+    public static void mostrar(DefaultMutableTreeNode nodoRaiz) {
+        if (paises != null) {
+            for (Pais pais : paises) {
+                DefaultMutableTreeNode nodoPais = new DefaultMutableTreeNode(
+                        pais.getCodigoAlfa2() + " - " + pais.getNombre());
                 nodoRaiz.add(nodoPais);
+                if (pais.getRegiones() != null) {
+                    for (Region region : pais.getRegiones()) {
+                        DefaultMutableTreeNode nodoRegion = new DefaultMutableTreeNode(region.getNombre());
+                        nodoPais.add(nodoRegion);
+
+                        if (region.getCiudades() != null) {
+                            for (Ciudad ciudad : region.getCiudades()) {
+                                DefaultMutableTreeNode nodoCiudad = new DefaultMutableTreeNode(
+                                        (ciudad.isCapitalRegion() ? "(CR) " : "") +
+                                                (ciudad.isCapitalPais() ? "(CP) " : "") +
+                                                ciudad.getNombre());
+                                nodoRegion.add(nodoCiudad);
+                            }
+                        }
+                    }
+                }
             }
+        }
     }
+    public static void mostrarMapa(JLabel lblMapa, String nombrePais, double escala) {
+        String rutaMapa = "src/mapas/" + nombrePais + ".jpg";
+        File archivoMapa = new File(rutaMapa);
+        if (archivoMapa.exists()) {
+            ImageIcon imgMapa = new ImageIcon(rutaMapa);
+
+            int ancho = (int) (imgMapa.getIconWidth() * escala);
+            int alto = (int) (imgMapa.getIconHeight() * escala);
+
+            ImageIcon imgMapaEscalado=new ImageIcon(imgMapa.getImage().getScaledInstance(ancho, alto, Image.SCALE_DEFAULT));
+
+            lblMapa.setIcon(imgMapaEscalado);
+        } else {
+            lblMapa.setIcon(null);
+            lblMapa.setText("no hay mapa disponible para " + nombrePais);
+            lblMapa.setVerticalAlignment(JLabel.CENTER);
+            lblMapa.setHorizontalAlignment(JLabel.CENTER);
+            
+        }
+        
+    }
+
 }
